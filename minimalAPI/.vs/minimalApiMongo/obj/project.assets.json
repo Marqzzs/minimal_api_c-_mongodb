@@ -1229,11 +1229,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\55358961879\\Desktop\\minimalAPI\\.vs\\minimalApiMongo\\minimalApiMongo.csproj",
+      "projectUniqueName": "C:\\Users\\55358961879\\Desktop\\minimal_api_c-_mongodb\\minimalAPI\\.vs\\minimalApiMongo\\minimalApiMongo.csproj",
       "projectName": "minimalApiMongo",
-      "projectPath": "C:\\Users\\55358961879\\Desktop\\minimalAPI\\.vs\\minimalApiMongo\\minimalApiMongo.csproj",
+      "projectPath": "C:\\Users\\55358961879\\Desktop\\minimal_api_c-_mongodb\\minimalAPI\\.vs\\minimalApiMongo\\minimalApiMongo.csproj",
       "packagesPath": "C:\\Users\\55358961879\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\55358961879\\Desktop\\minimalAPI\\.vs\\minimalApiMongo\\obj\\",
+      "outputPath": "C:\\Users\\55358961879\\Desktop\\minimal_api_c-_mongodb\\minimalAPI\\.vs\\minimalApiMongo\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\55358961879\\AppData\\Roaming\\NuGet\\NuGet.Config",
