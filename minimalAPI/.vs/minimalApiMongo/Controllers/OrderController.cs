@@ -53,10 +53,22 @@ namespace minimalApiMongo.Controllers
         public async Task<ActionResult<List<Order>>> Get()
         {
             try
-            {
-                //Faz uma filtragem e tras a lista do pedidos
+            {                
                 var orders = await _order.Find(FilterDefinition<Order>.Empty).ToListAsync();
-                //retorna um ok e a lista
+                
+                foreach (var order in orders)
+                {
+                    if (!string.IsNullOrEmpty(order.ClientId))
+                    {
+                        order.Client = await _client.Find(x => x.Id == order.ClientId).FirstOrDefaultAsync();
+                    }
+
+                    if (order.ProductId != null && order.ProductId.Any())
+                    {
+                        order.Products = await _product.Find(x => order.ProductId.Contains(x.Id)).ToListAsync();
+                    }
+                }
+
                 return Ok(orders);
             }
             catch (Exception e)
@@ -64,6 +76,7 @@ namespace minimalApiMongo.Controllers
                 return BadRequest(e.Message);
             }
         }
+
 
         /// <summary>
         /// Obtém uma ordem específica pelo ID
@@ -73,11 +86,29 @@ namespace minimalApiMongo.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<Order>> GetById(string id)
         {
-            //Busca por id um objeto especifico
+            // Busca por id um objeto específico
             var order = await _order.Find(p => p.Id == id).FirstOrDefaultAsync();
-            //Faz um ternario, se nao for null retorna o objeto buscado, caso seja null retorna um not found
-            return order is not null ? Ok(order) : NotFound();
+
+            if (order == null)
+            {
+                return NotFound();
+            }
+
+            // Populate client details if ClientId is not null
+            if (!string.IsNullOrEmpty(order.ClientId))
+            {
+                order.Client = await _client.Find(x => x.Id == order.ClientId).FirstOrDefaultAsync();
+            }
+
+            // Populate product details if ProductId list is not null or empty
+            if (order.ProductId != null && order.ProductId.Any())
+            {
+                order.Products = await _product.Find(x => order.ProductId.Contains(x.Id)).ToListAsync();
+            }
+
+            return Ok(order);
         }
+
 
         /// <summary>
         /// Cria uma nova ordem
@@ -143,22 +174,42 @@ namespace minimalApiMongo.Controllers
         /// <param name="id">ID da ordem</param>
         /// <param name="order">Dados atualizados da ordem</param>
         /// <returns>Resultado da atualização</returns>
-        [HttpPut]
-        public async Task<ActionResult> Update(string id, Order order)
+        [HttpPut("{id}")]
+        public async Task<ActionResult> Update(string id, OrderViewModel updatedOrderViewModel)
         {
             try
             {
-                //Faz uma filtragem de um objeto buscado
-                var filter = Builders<Order>.Filter.Eq(x => x.Id, order.Id);
-                //Faz uma atualizacao do mesmo
-                await _order.ReplaceOneAsync(filter, order);
-                //Retorna um ok
-                return Ok();
+                var existingOrder = await _order.Find(x => x.Id == id).FirstOrDefaultAsync();
+                if (existingOrder == null)
+                {
+                    return NotFound();
+                }
+
+                existingOrder.Data = updatedOrderViewModel.Data;
+                existingOrder.Status = updatedOrderViewModel.Status;
+                existingOrder.ClientId = updatedOrderViewModel.ClientId;
+                existingOrder.ProductId = updatedOrderViewModel.ProductId;
+
+                if (!string.IsNullOrEmpty(existingOrder.ClientId))
+                {
+                    existingOrder.Client = await _client.Find(x => x.Id == existingOrder.ClientId).FirstOrDefaultAsync();
+                }
+
+                if (existingOrder.ProductId != null && existingOrder.ProductId.Any())
+                {
+                    existingOrder.Products = await _product.Find(x => existingOrder.ProductId.Contains(x.Id)).ToListAsync();
+                }
+
+                var filter = Builders<Order>.Filter.Eq(x => x.Id, id);
+                await _order.ReplaceOneAsync(filter, existingOrder);
+
+                return Ok(existingOrder);
             }
             catch (Exception e)
             {
                 return BadRequest(e.Message);
             }
         }
+
     }
 }
